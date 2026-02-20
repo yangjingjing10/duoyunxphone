@@ -1,0 +1,38 @@
+{
+  "name": "我的小手机",
+  "short_name": "小手机",
+  "description": "日系奶油风虚拟手机",
+  "start_url": "/dxyphone/",
+  "scope": "/dxyphone/",
+  "display": "standalone",
+  "background_color": "#FFF5E6",
+  "theme_color": "#FFFFFF",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/dxyphone/my-icon.png",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/dxyphone/my-icon.png",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
