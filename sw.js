@@ -1,78 +1,52 @@
-// Service Worker - 网络优先策略
-const CACHE_NAME = 'myphone-v' + Date.now(); // 每次构建自动更新版本
-const BASE_PATH = '/dxyphone/';
+// Service Worker - 让你的网页可以离线访问
+const CACHE_NAME = 'myphone-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/manifest.json'
+];
 
+// 安装 Service Worker
 self.addEventListener('install', event => {
-  console.log('[SW] Installing new version:', CACHE_NAME);
-  self.skipWaiting();
+  console.log('Service Worker 安装中...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll([
-        BASE_PATH,
-        BASE_PATH + 'index.html',
-        BASE_PATH + 'manifest.json',
-        BASE_PATH + 'favicon.svg'
-      ]).catch(err => {
-        console.log('[SW] Cache addAll failed:', err);
-      });
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('缓存已打开');
+        return cache.addAll(urlsToCache);
+      })
+      .catch(err => console.error('缓存失败:', err))
   );
+  self.skipWaiting();
 });
 
+// 拦截请求，优先使用缓存
 self.addEventListener('fetch', event => {
-  // 网络优先策略：先尝试网络，失败才用缓存
   event.respondWith(
-    fetch(event.request)
+    caches.match(event.request)
       .then(response => {
-        // 如果网络请求成功，更新缓存
-        if (response && response.status === 200) {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+        if (response) {
+          return response;
         }
-        return response;
-      })
-      .catch(() => {
-        // 网络失败时使用缓存
-        return caches.match(event.request).then(response => {
-          if (response) {
-            return response;
-          }
-          return new Response('离线状态', { 
-            status: 503, 
-            statusText: 'Service Unavailable' 
-          });
-        });
+        return fetch(event.request);
       })
   );
 });
 
+// 清理旧缓存
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating new version:', CACHE_NAME);
+  console.log('Service Worker 激活中...');
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', cacheName);
+            console.log('删除旧缓存:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => {
-      console.log('[SW] Claiming clients');
-      return self.clients.claim();
     })
   );
+  return self.clients.claim();
 });
-
-
-
-
-
-
-
-
-
-
